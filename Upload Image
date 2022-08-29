@@ -1,0 +1,108 @@
+<?php
+
+function UploadImageFile()
+{
+    #directory name // اسم الملف
+    $target_dir = "uploads/";
+    #Upload file name // اسم ملف التحميل 
+    $fileToUpload_name = basename($_FILES["fileToUpload"]["name"]);
+    #Upload file relative path // تحميل مسار نسبي للملف
+    $target_file = $target_dir . $fileToUpload_name;
+
+    //صورة حقيقية
+    if (!isImageReal()) return;
+    // الملف موجود
+    if (isFileExists($target_file)) return;
+    // ليست صورة
+    if (isNotImage($target_file)) return;
+
+    // upload image file
+    if (move_upload_files($_Files["fileToUpload"]["tmp_name"], $target_file)) {
+        echo '<p class="success-msg">تم رفع الصورة بنجاح</p>';
+        echo showImg($target_file);
+    } else {
+        echo '<p class="error-msg">عذراً، هناك خطأ في رفع الصورة</p>';
+    }
+  
+}
+// اتحقق ما إذا كان ملف الصورة حقيقي أم مزيف
+//Check if image file is an actual image or fake image
+function isImageReal()
+{
+    if (isset($_POST["sumbit"])) {
+        $check = getimagesize($_FILES["fileToUpload"]["tmp_name"]);
+        if ($check == false) {
+            echo '<p class="error-msg">الملف المرفق ليس صورة</p>';
+            return 0;
+        }
+    }
+    return 1;
+}
+
+// هل الملف موجود بالفعل
+// Check if file already exists
+function isFileExists($target_file)
+{
+    if (file_exists($target_file)) {
+        echo '<p class="error-msg">عذراً، ملف الصورة موجود مسبقاً</p>';
+        echo showImg($targrt_file);
+        return 1;
+    }
+    return 0;
+}
+
+function isNotImage($target_file)
+{
+    $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+    // السماح يتنسيق امتدادات الصور
+    // Allow certain file formats
+    if (
+        $imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
+        && $imageFileType != "gif"
+    )  {
+        echo '<p class="error-msg">عذراً، صيغ الملفات المدعومة هيJPG, JPEG, PNG & GIF .</p>';
+        return 1;
+    }
+    return 0;
+}
+
+function showImg($target_file)
+{
+    $stats['localpath'] =  $target_file;
+    return '<div class="uploadedImg-div"><img src="' . $stats['localpath'] . '"/></div>';
+}
+?>
+
+<?php
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Form Files In Php</title>
+</head>
+<div style=background-image:url('https://th.bing.com/th/id/R.a36c569df378fa5bef9b5c1640172fdb?rik=Q7jrsNVLR97A8A&riu=http%3a%2f%2fpic43.photophoto.cn%2f20170610%2f0008118011312434_b.jpg&ehk=CJjiKmrAL%2fwSbdEdR42Vonj%2bHYTfnj2SrliiJbgTVB8%3d&risl=&pid=ImgRaw&r=0')>
+<center>
+<br>
+<body>
+    <header>
+        <br>
+        <h1 style=color:#86B2DF>رفع ملف (صورة) من نموذج</h1>
+    </header>
+    <div class="row">
+        <div class="upload-container">
+            <form action="FilesFn.php" method="post" enctype="multipart/form-data">
+            <br>
+             <label for="fileToUpload">اختر صورة من جهازك</label>
+                <br>
+                <input type="file" name="upload">
+                <br>
+                <button type="sumbit" name="sumbit">رفع الصورة</button>
+                </div>
+                </form>
+                </div>
+                <div class="result">
+                </div>
+ </center>    
+</div>    
+</body>   
+</html>
